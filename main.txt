@@ -1,0 +1,8 @@
+Export ppl(a,b,c,d)
+Begin
+  Bisseccao(a,b,c,d);
+  MNR(a,b,c,d);
+  LU(a,b,c,d);
+  GJ(a,b,c,d);
+  GS(a,b,c,d);
+End;
