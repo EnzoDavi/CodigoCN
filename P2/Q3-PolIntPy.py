@@ -1,41 +1,72 @@
-X = [3,3.2,3.4]
-f = [20.08,24.53,29.96]
-x0 = 3.3
-
 import math
 
-def lagrange(x_vals, y_vals, x):
-    n = len(x_vals)
-    resultado = 0
+X = [0.9,1,1.3,1.8,2,2.2]
+f = [-0.105,0,0.262,0.588,0.693,0.788]
+x0 = 1.4
+ordem = 3
 
-    for i in range(n):
-        termo = y_vals[i]
-        for j in range(n):
-            if i != j:
-                termo *= (x - x_vals[j]) / (x_vals[i] - x_vals[j])
-        resultado += termo
+def aval_funcao(fun, x):
+    fun = fun.upper()
+    
+    fun = fun.replace('SEN', 'math.sin')
+    fun = fun.replace('COS', 'math.cos')
+    fun = fun.replace('TAN', 'math.tan')
+    fun = fun.replace('E^', 'math.exp')
+    fun = fun.replace('LN', 'math.log')
+    fun = fun.replace('^', '**')
+    
+    fun = fun.replace('X', f'({x})')
+    
+    return eval(fun, {"math": math})
 
-    return resultado
+print("\n###### Tebela diferença divisão ######\n")
 
+dif_div = [f]
 
-def erro_interpolacao_exp(x_vals, x):
-    """
-    Calcula o limitante do erro para f(x) = e^x
-    usando interpolação de grau n-1
-    """
-    n = len(x_vals)
+for i in range(len(X)-1):
+    dif_div.append([])
+    for j in range(len(X)-1-i):
+        dif_div[-1].append((dif_div[-2][j+1]-dif_div[-2][j])/(X[j+i+1]-X[j]))
 
-    # produto (x - xi)
-    produto = 1
-    for xi in x_vals:
-        produto *= (x - xi)
+for i in dif_div:
+    print(i)
 
-    # máximo de e^x no intervalo
-    max_x = max(x_vals + [x])
-    M = math.exp(max_x)
+print("\n##### Definir polinomio de Newton #####\n")
 
-    erro = abs(M * produto / math.factorial(n))
-    return erro
+for i in range(len(X)):
+    if x0 < X[i]:
+        ponto_ref = i
+        break
 
-print(lagrange(X,f,x0))
-print(erro_interpolacao_exp(X,x0))
+polinomioN = "P(x) = "
+
+for i in range(ordem):
+    polinomioN += str(dif_div[i][ponto_ref-ordem+1])
+    polinomioN += "*"
+    for j in range(i):
+        polinomioN += ("(x - ")
+        polinomioN += str(X[ponto_ref-ordem+j+1])
+        polinomioN += ")*"
+    polinomioN = polinomioN[:-1]
+    polinomioN += " + "
+
+polinomioN = polinomioN[:-3]
+
+print(polinomioN)
+
+print("\n##### Calculando função em X0 #####\n")
+
+valor = aval_funcao(polinomioN[6:],x0)
+
+print("P(" + str(x0) + ") = " + str(valor))
+
+print("\n##### Calculando o erro #####\n")
+
+erro = dif_div[ordem][ponto_ref-ordem]
+texto = "erro = " + str(dif_div[ordem][ponto_ref-ordem])
+
+for i in range(ordem):
+    erro *= x0-X[ponto_ref-i]
+    texto += "(" + str(x0) + " - " + str(X[ponto_ref-i]) + ")"
+
+print(texto + " = " + str(abs(erro)))
